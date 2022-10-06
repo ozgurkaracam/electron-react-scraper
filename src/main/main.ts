@@ -75,6 +75,7 @@ const createWindow = async () => {
     width: 1024,
     height: 728,
     icon: getAssetPath('icon.png'),
+    resizable:false,
     webPreferences: {
 
       nodeIntegration:true,
@@ -142,6 +143,8 @@ app
   .catch(console.log);
 
   ipcMain.on("getTitles",async (e,val)=>{
+    if(val=='')
+    return [];
     console.log("çekiliyor...")
     const titles=await getTitlesAllPages(val)
     mainWindow?.webContents.send("titles",titles)

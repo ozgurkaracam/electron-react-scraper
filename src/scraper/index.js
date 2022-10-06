@@ -4,14 +4,16 @@ const fs = require('fs');
 const cookiejar = require('axios-cookiejar-support');
 const { findSourceMap } = require('module');
 const request = require('request-promise');
+const turkishtoenglish = require('../utils/turkishtoenglish');
 
 async function main() {
-  // const target = await getChannels();
-  const target = await getTitlesAllPages('sinema');
+  const target = await getChannels();
+  // const target = await getTitlesAllPages('eğitim');
   console.log(target);
 }
 
 async function getTitlesAllPages(channel) {
+  // channel = turkishtoenglish(channel);
   let page = 1;
   let arr = [];
   while (true) {
@@ -20,11 +22,14 @@ async function getTitlesAllPages(channel) {
     arr = [...arr, ...newArr];
     page++;
   }
-  return arr;
+  return arr.sort((a, b) => {
+    return a.entryCount > b.entryCount ? -1 : 1;
+  });
 }
 
 async function getTitles(channel, page = 1) {
-  const url = `https://eksisozluk.com/basliklar/kanal/${channel}?p=${page}`;
+  // const url = `https://eksisozluk.com/basliklar/kanal/${channel}?p=${page}`;
+  const url = `${channel}?p=${page}`;
   const data = await request.get(url, {});
 
   const $ = await load(data);
@@ -36,11 +41,11 @@ async function getTitles(channel, page = 1) {
       let title = $(e).text().trim();
       const span = $(e).find('small').text().trim();
       title = title.replace(` ${span}`, '');
-      link = `https://eksisozluk.com${$(e).find('a').attr('href')}`;
+      const link = `https://eksisozluk.com${$(e).find('a').attr('href')}`;
       return {
         title,
         link,
-        entryCount: span == '' ? 0 : parseInt(span),
+        entryCount: span == '' ? 1 : parseInt(span),
       };
     })
     .get();
@@ -52,12 +57,16 @@ async function getChannels() {
   const { data } = await axios.get(url);
   const $ = await load(data);
   const channelList = $('#channel-follow-list li')
-    .map((i, e) => $(e).find('.index-link').text().replaceAll('#', '').trim())
+    .map((i, e) => ({
+      title: $(e).find('.index-link').text().replaceAll('#', '').trim(),
+      link: `https://eksisozluk.com${$(e).find('.index-link').attr('href')}`,
+    }))
     .get();
   return channelList;
 }
-// main();
 module.exports = {
   getChannels,
   getTitlesAllPages,
 };
+
+// main();

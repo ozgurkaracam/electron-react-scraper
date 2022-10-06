@@ -4,43 +4,16 @@ import './App.css';
 import { useEffect,useState } from 'react';
 import SelectBox from './components/SelectBox';
 import Entries from './components/Entries';
-
-const Hello = () => {
-  const [channels, setchannels] = useState([])
-  const [titles, settitles] = useState([])
-
-  function changeChannel(e){
-    window.electron.ipcRenderer.sendMessage("getTitles",e.target.value);
+import { Container } from 'react-bootstrap';
+import Home from './components/Home';
 
 
-  }
-  useEffect(() => {
-    window.electron.ipcRenderer.on("channels",(channels)=>{
-      setchannels(channels);
-    })
-    window.electron.ipcRenderer.on("titles",(titles)=>{
-      settitles(titles)
-      console.log(titles);
-
-    })
-    return () => {
-
-    }
-  }, [])
-
-  return (
-    <>
-    <SelectBox channels={channels} changeChannel={changeChannel}  />
-      <Entries titles={titles} />
-    </>
-  );
-};
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </Router>
   );
