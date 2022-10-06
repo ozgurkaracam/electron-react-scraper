@@ -6,6 +6,7 @@ const { findSourceMap } = require('module');
 const request = require('request-promise');
 
 async function main() {
+  // const target = await getChannels();
   const target = await getTitlesAllPages('sinema');
   console.log(target);
 }
@@ -35,8 +36,10 @@ async function getTitles(channel, page = 1) {
       let title = $(e).text().trim();
       const span = $(e).find('small').text().trim();
       title = title.replace(` ${span}`, '');
+      link = `https://eksisozluk.com${$(e).find('a').attr('href')}`;
       return {
         title,
+        link,
         entryCount: span == '' ? 0 : parseInt(span),
       };
     })
@@ -53,5 +56,8 @@ async function getChannels() {
     .get();
   return channelList;
 }
-
-main();
+// main();
+module.exports = {
+  getChannels,
+  getTitlesAllPages,
+};

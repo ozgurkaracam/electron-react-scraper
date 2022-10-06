@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { getChannels, getTitlesAllPages } from '../scraper';
 
 class AppUpdater {
   constructor() {
@@ -75,6 +76,8 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+
+      nodeIntegration:true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -83,7 +86,7 @@ const createWindow = async () => {
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
-  mainWindow.on('ready-to-show', () => {
+  mainWindow.on('ready-to-show', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -92,6 +95,8 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+    const titles=await getChannels()
+    mainWindow.webContents.send("channels",titles)
   });
 
   mainWindow.on('closed', () => {
@@ -135,3 +140,10 @@ app
     });
   })
   .catch(console.log);
+
+  ipcMain.on("getTitles",async (e,val)=>{
+    console.log("çekiliyor...")
+    const titles=await getTitlesAllPages(val)
+    mainWindow?.webContents.send("titles",titles)
+  })
+
